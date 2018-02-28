@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 const list = [
@@ -25,33 +24,56 @@ class App extends Component {
     super(props);
     this.state = {
       list,
+      searchTerm: '',
     };
+    this.onSearchChange = this.onSearchChange.bind(this);
   }
 
-  handleDismiss = id => {
-    let typeList = [...this.state.list]; // 应该使用深拷贝吧？
-    typeList = typeList.filter(item => item.objectID !== id);
-    this.setState({ list: typeList });
+  onDismiss = id => {
+    const isNotId = item => item.objectID !== id;
+    // filter、map、reduce 等都是纯函数式的，没有副作用，返回的也都是新的数组
+    const updateList = this.state.list.filter(isNotId);
+    this.setState({ list: updateList });
   };
 
+  onSearchChange(e) {
+    this.setState({ searchTerm: e.target.value });
+  }
+
   render() {
+    const { list: listState, searchTerm } = this.state; //使用结构赋值的方式
     const msg = 'welcome to the Road to learn React111';
+    debugger;
     return (
       <div className="App">
         <h2>{msg}</h2>
-        {this.state.list.map(item => (
-          <div key={item.objectID}>
-            <span>
-              <a href={item.url}>{item.title}</a>
-            </span>
-            <span>{item.author}</span>
-            <span>{item.num_comments}</span>
-            <span>{item.points}</span>
-            <button onClick={() => this.handleDismiss(item.objectID)}>Dismiss</button>
-          </div>
-        ))}
+        <form action="">
+          输入查询名称：
+          <input
+            type="text"
+            onChange={this.onSearchChange}
+            value={searchTerm} //受控组件的写法
+          />
+        </form>
+        {listState
+          .filter(listItem =>
+            listItem.title.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map(item => (
+            <div key={item.objectID}>
+              <span>
+                <a href={item.url}>{item.title}</a>
+              </span>
+              <span>{item.author}</span>
+              <span>{item.num_comments}</span>
+              <span>{item.points}</span>
+              <button onClick={() => this.onDismiss(item.objectID)}>
+                Dismiss
+              </button>
+            </div>
+          ))}
       </div>
-    ); 
+    );
   }
 }
 
