@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
+
 const list = [
   {
     title: 'React',
@@ -45,36 +46,68 @@ class App extends Component {
     const msg = 'welcome to the Road to learn React111';
     debugger;
     return (
-      <div className="App">
-        <h2>{msg}</h2>
-        <form action="">
-          输入查询名称：
-          <input
-            type="text"
-            onChange={this.onSearchChange}
-            value={searchTerm} //受控组件的写法
-          />
-        </form>
-        {listState
-          .filter(listItem =>
-            listItem.title.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map(item => (
-            <div key={item.objectID}>
-              <span>
-                <a href={item.url}>{item.title}</a>
-              </span>
-              <span>{item.author}</span>
-              <span>{item.num_comments}</span>
-              <span>{item.points}</span>
-              <button onClick={() => this.onDismiss(item.objectID)}>
-                Dismiss
-              </button>
-            </div>
-          ))}
+      <div className="page">
+        <div className="interactions">
+          <Search value={this.state.searchTerm} onChange={this.onSearchChange}>
+            输入查询名称：{/* children的使用 */}
+          </Search>
+        </div>
+        <Table
+          list={listState}
+          pattern={searchTerm}
+          onDismiss={this.onDismiss}
+        />
       </div>
     );
   }
 }
+
+const Search = ({ value, onChange, children }) => (
+  <form action="">
+    {children}
+    <input
+      type="text"
+      onChange={onChange}
+      value={value} //受控组件的写法
+    />
+  </form>
+);
+
+const Table = ({ list: listData, pattern, onDismiss }) => {
+  const largeColumn = { width: '40%' };
+  const midColumn = { width: '30%' };
+  const smallColumn = { width: '10%' };
+  return (
+    <div className="table">
+      {listData
+        .filter(listItem =>
+          listItem.title.toLowerCase().includes(pattern.toLowerCase())
+        )
+        .map(item => (
+          <div key={item.objectID} className="table-row">
+            <span style={largeColumn}>
+              <a href={item.url}>{item.title}</a>
+            </span>
+            <span style={midColumn}>{item.author}</span>
+            <span style={smallColumn}>{item.num_comments}</span>
+            <span style={smallColumn}>{item.points}</span>
+            <Button
+              style={smallColumn}
+              onClick={() => onDismiss(item.objectID)}
+              className="button-inline"
+            >
+              Dismiss
+            </Button>
+          </div>
+        ))}
+    </div>
+  );
+};
+//es6的方式设置默认值
+const Button = ({ children, onClick, className = '' }) => (
+  <button type="button" onClick={onClick} className={className}>
+    {children}
+  </button>
+);
 
 export default App;
