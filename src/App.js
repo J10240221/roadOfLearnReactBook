@@ -1,89 +1,127 @@
 import React, { Component } from 'react';
 import './App.css';
 
+const DEFAULT_QUERY = 'redux';
 
-const list = [
-  {
-    title: 'React',
-    url: 'www.baidu.com',
-    author: 'Azhilingege',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'www.hao123.com',
-    author: 'Bzhilingege',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+
+// const list = [
+//   {
+//     title: 'React',
+//     url: 'www.baidu.com',
+//     author: 'Azhilingege',
+//     num_comments: 3,
+//     points: 4,
+//     objectID: 0,
+//   },
+//   {
+//     title: 'Redux',
+//     url: 'www.hao123.com',
+//     author: 'Bzhilingege',
+//     num_comments: 2,
+//     points: 5,
+//     objectID: 1,
+//   },
+// ];
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      list,
-      searchTerm: '',
+      result: null,
+      searchTerm: DEFAULT_QUERY,
     };
+    this.loadSearchData = this.loadSearchData.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+  }
+
+  //发起请求的好时机
+  componentDidMount() {
+    this.loadSearchData();
   }
 
   onDismiss = id => {
     const isNotId = item => item.objectID !== id;
     // filter、map、reduce 等都是纯函数式的，没有副作用，返回的也都是新的数组
-    const updateList = this.state.list.filter(isNotId);
-    this.setState({ list: updateList });
+    const updateHits = this.state.result.hits.filter(isNotId);
+    const updateResult = {
+      ...this.state.result,
+      hits: updateHits,
+    };
+    this.setState({ result: updateResult });
   };
 
   onSearchChange(e) {
     this.setState({ searchTerm: e.target.value });
   }
 
+  onSearchSubmit(e) {
+    e.preventDefault();
+    const { searchTerm } = this.state;
+    this.loadSearchData();
+  }
+
+  setSearchTopStories(result) {
+    this.setState({ result });
+  }
+
+  loadSearchData() {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${this.state.searchTerm}`)
+      .then(res => res.json())
+      .then(json => this.setSearchTopStories(json))
+      .catch(e => e);
+  }
+
   render() {
-    const { list: listState, searchTerm } = this.state; //使用结构赋值的方式
-    const msg = 'welcome to the Road to learn React111';
-    debugger;
+    const { result, searchTerm } = this.state; //使用结构赋值的方式
     return (
       <div className="page">
         <div className="interactions">
-          <Search value={this.state.searchTerm} onChange={this.onSearchChange}>
-            输入查询名称：{/* children的使用 */}
+          <Search
+            value={this.state.searchTerm}
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
+          >
+            搜索{/* children的使用 */}
           </Search>
         </div>
-        <Table
-          list={listState}
-          pattern={searchTerm}
-          onDismiss={this.onDismiss}
-        />
+        {result && <Table list={result.hits} onDismiss={this.onDismiss} />}
       </div>
     );
   }
 }
 
-const Search = ({ value, onChange, children }) => (
-  <form action="">
-    {children}
+const Search = ({ value, onChange, onSubmit, children }) => (
+  <form onSubmit={onSubmit}>
     <input
       type="text"
       onChange={onChange}
       value={value} //受控组件的写法
     />
+    <button type="submit">{children}</button>
   </form>
 );
 
-const Table = ({ list: listData, pattern, onDismiss }) => {
+const Table = ({ list, onDismiss }) => {
   const largeColumn = { width: '40%' };
   const midColumn = { width: '30%' };
   const smallColumn = { width: '10%' };
   return (
     <div className="table">
-      {listData
-        .filter(listItem =>
-          listItem.title.toLowerCase().includes(pattern.toLowerCase())
-        )
-        .map(item => (
+      <div className="table-row">
+        <span style={largeColumn}>title</span>
+        <span style={midColumn}>author</span>
+        <span style={smallColumn}>num_comments</span>
+        <span style={smallColumn}>points</span>
+        <span style={smallColumn}>operation</span>
+      </div>
+      {console.log('list', list)}
+      {list &&
+        list.map(item => (
           <div key={item.objectID} className="table-row">
             <span style={largeColumn}>
               <a href={item.url}>{item.title}</a>
@@ -103,6 +141,7 @@ const Table = ({ list: listData, pattern, onDismiss }) => {
     </div>
   );
 };
+
 //es6的方式设置默认值
 const Button = ({ children, onClick, className = '' }) => (
   <button type="button" onClick={onClick} className={className}>
