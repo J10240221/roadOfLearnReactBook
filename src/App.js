@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
+const DEFAULT_HPP = 2;
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
+const PARAM_HPP = 'hitsPerPage=';
 
 // const list = [
 //   {
@@ -33,7 +36,8 @@ class App extends Component {
       result: null,
       searchTerm: DEFAULT_QUERY,
     };
-    this.loadSearchData = this.loadSearchData.bind(this);
+    this.hpp = DEFAULT_HPP; //每页数据条数
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
@@ -41,7 +45,7 @@ class App extends Component {
 
   //发起请求的好时机
   componentDidMount() {
-    this.loadSearchData();
+    this.fetchSearchTopStories(this.state.searchTerm);
   }
 
   onDismiss = id => {
@@ -62,15 +66,26 @@ class App extends Component {
   onSearchSubmit(e) {
     e.preventDefault();
     const { searchTerm } = this.state;
-    this.loadSearchData();
+    this.fetchSearchTopStories(searchTerm);
   }
 
   setSearchTopStories(result) {
-    this.setState({ result });
+    const { page = 0, hits } = result;
+    const oldHits = page === 0 ? [] : this.state.result.hits;
+    const updateResult = {
+      ...this.state.result,
+      hits: [...oldHits, ...hits],
+      page,
+    };
+    this.setState({ result: updateResult });
   }
 
-  loadSearchData() {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${this.state.searchTerm}`)
+  fetchSearchTopStories(searchTerm, page = 0) {
+    fetch(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${
+        this.hpp
+      }`
+    )
       .then(res => res.json())
       .then(json => this.setSearchTopStories(json))
       .catch(e => e);
@@ -78,6 +93,7 @@ class App extends Component {
 
   render() {
     const { result, searchTerm } = this.state; //使用结构赋值的方式
+    const page = (result && result.page) || 0;
     return (
       <div className="page">
         <div className="interactions">
@@ -90,6 +106,15 @@ class App extends Component {
           </Search>
         </div>
         {result && <Table list={result.hits} onDismiss={this.onDismiss} />}
+        <div className="interactions">
+          <Button
+            onClick={() => {
+              this.fetchSearchTopStories(searchTerm, page + 1);
+            }}
+          >
+            more
+          </Button>
+        </div>
       </div>
     );
   }
@@ -119,7 +144,6 @@ const Table = ({ list, onDismiss }) => {
         <span style={smallColumn}>points</span>
         <span style={smallColumn}>operation</span>
       </div>
-      {console.log('list', list)}
       {list &&
         list.map(item => (
           <div key={item.objectID} className="table-row">
