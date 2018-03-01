@@ -33,7 +33,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      result: null,
+      results: {},
+      searchKey: '',
       searchTerm: DEFAULT_QUERY,
     };
     this.hpp = DEFAULT_HPP; //每页数据条数
@@ -41,22 +42,32 @@ class App extends Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.needToSearchTopStories = this.needToSearchTopStories.bind(this);
   }
 
   //发起请求的好时机
   componentDidMount() {
-    this.fetchSearchTopStories(this.state.searchTerm);
+    const { searchTerm, searchKey } = this.state;
+    //eslint-disable-next-line
+    this.setState({ searchKey: searchTerm }, () =>
+      this.fetchSearchTopStories(searchKey)
+    );
   }
 
+  //results: {redux:{hits:[],page:1},react:{hits:[],page:1}}
   onDismiss = id => {
+    const { results, searchKey } = this.state;
     const isNotId = item => item.objectID !== id;
     // filter、map、reduce 等都是纯函数式的，没有副作用，返回的也都是新的数组
-    const updateHits = this.state.result.hits.filter(isNotId);
-    const updateResult = {
-      ...this.state.result,
-      hits: updateHits,
+    const updateHits = results[searchKey].hits.filter(isNotId);
+    const updateResults = {
+      ...results,
+      [searchKey]: {
+        ...results[searchKey],
+        hits: updateHits,
+      },
     };
-    this.setState({ result: updateResult });
+    this.setState({ results: updateResults });
   };
 
   onSearchChange(e) {
@@ -65,19 +76,32 @@ class App extends Component {
 
   onSearchSubmit(e) {
     e.preventDefault();
-    const { searchTerm } = this.state;
-    this.fetchSearchTopStories(searchTerm);
+    const { searchTerm, searchKey } = this.state;
+    this.setState({ searchKey: searchTerm }, () => {
+      if (this.needToSearchTopStories(searchKey)) {
+        this.fetchSearchTopStories(searchKey);
+      }
+    });
   }
 
-  setSearchTopStories(result) {
-    const { page = 0, hits } = result;
-    const oldHits = page === 0 ? [] : this.state.result.hits;
-    const updateResult = {
-      ...this.state.result,
-      hits: [...oldHits, ...hits],
-      page,
+  setSearchTopStories(json) {
+    const { page = 0, hits } = json;
+    const { results, searchKey } = this.state;
+    const oldHits =
+      (results && results[searchKey] && results[searchKey].hits) || [];
+    const updateHits = [...oldHits, ...hits];
+    const updateResults = {
+      ...results,
+      [searchKey]: {
+        hits: updateHits,
+        page,
+      },
     };
-    this.setState({ result: updateResult });
+    this.setState({ results: updateResults });
+  }
+
+  needToSearchTopStories(searchKey) {
+    return !this.state.results[searchKey];
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
@@ -92,20 +116,23 @@ class App extends Component {
   }
 
   render() {
-    const { result, searchTerm } = this.state; //使用结构赋值的方式
-    const page = (result && result.page) || 0;
+    const { results, searchTerm, searchKey } = this.state; //使用解构赋值的方式
+    const page =
+      (results && results[searchKey] && results[searchKey].page) || 0;
+    const list =
+      (results && results[searchKey] && results[searchKey].hits) || [];
     return (
       <div className="page">
         <div className="interactions">
           <Search
-            value={this.state.searchTerm}
+            value={searchTerm}
             onChange={this.onSearchChange}
             onSubmit={this.onSearchSubmit}
           >
             搜索{/* children的使用 */}
           </Search>
         </div>
-        {result && <Table list={result.hits} onDismiss={this.onDismiss} />}
+        {<Table list={list} onDismiss={this.onDismiss} />}
         <div className="interactions">
           <Button
             onClick={() => {
