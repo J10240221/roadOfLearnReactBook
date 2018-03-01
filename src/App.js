@@ -36,6 +36,7 @@ class App extends Component {
       results: {},
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
+      error: null,
     };
     this.hpp = DEFAULT_HPP; //每页数据条数
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
@@ -112,7 +113,7 @@ class App extends Component {
     )
       .then(res => res.json())
       .then(json => this.setSearchTopStories(json))
-      .catch(e => e);
+      .catch(error => this.setState({ error }));
   }
 
   render() {
@@ -121,6 +122,7 @@ class App extends Component {
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
       (results && results[searchKey] && results[searchKey].hits) || [];
+
     return (
       <div className="page">
         <div className="interactions">
@@ -132,7 +134,11 @@ class App extends Component {
             搜索{/* children的使用 */}
           </Search>
         </div>
-        {<Table list={list} onDismiss={this.onDismiss} />}
+        {this.state.error ? (
+          <h1>something went wrong.</h1>
+        ) : (
+          <Table list={list} onDismiss={this.onDismiss} />
+        )}
         <div className="interactions">
           <Button
             onClick={() => {
