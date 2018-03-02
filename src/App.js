@@ -39,6 +39,7 @@ class App extends Component {
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
+      loading: false,
     };
     this.hpp = DEFAULT_HPP; //每页数据条数
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
@@ -100,7 +101,7 @@ class App extends Component {
         page,
       },
     };
-    this.setState({ results: updateResults });
+    this.setState({ results: updateResults, loading: false });
   }
 
   needToSearchTopStories(searchKey) {
@@ -108,18 +109,20 @@ class App extends Component {
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
-    fetch(
-      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${
-        this.hpp
-      }`
-    )
-      .then(res => res.json())
-      .then(json => this.setSearchTopStories(json))
-      .catch(error => this.setState({ error }));
+    this.setState({ loading: true }, () => {
+      fetch(
+        `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${
+          this.hpp
+        }`
+      )
+        .then(res => res.json())
+        .then(json => this.setSearchTopStories(json))
+        .catch(error => this.setState({ error, loading: false }));
+    });
   }
 
   render() {
-    const { results, searchTerm, searchKey } = this.state; //使用解构赋值的方式
+    const { results, searchTerm, searchKey, loading } = this.state; //使用解构赋值的方式
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -142,29 +145,47 @@ class App extends Component {
           <Table list={list} onDismiss={this.onDismiss} />
         )}
         <div className="interactions">
-          <Button
-            onClick={() => {
-              this.fetchSearchTopStories(searchTerm, page + 1);
-            }}
-          >
-            more
-          </Button>
+          {loading ? (
+            <Loading />
+          ) : (
+            <Button
+              onClick={() => {
+                this.fetchSearchTopStories(searchTerm, page + 1);
+              }}
+            >
+              more
+            </Button>
+          )}
         </div>
       </div>
     );
   }
 }
 
-const Search = ({ value, onChange, onSubmit, children }) => (
-  <form onSubmit={onSubmit}>
-    <input
-      type="text"
-      onChange={onChange}
-      value={value} //受控组件的写法
-    />
-    <button type="submit">{children}</button>
-  </form>
-);
+class Search extends Component {
+  componentDidMount() {
+    if (this.input) {
+      this.input.focus();
+    }
+  }
+
+  render() {
+    const { value, onChange, onSubmit, children } = this.props;
+    return (
+      <form onSubmit={onSubmit}>
+        <input
+          type="text"
+          onChange={onChange}
+          value={value} //受控组件的写法
+          ref={ref => {
+            this.input = ref;
+          }}
+        />
+        <button type="submit">{children}</button>
+      </form>
+    );
+  }
+}
 
 Search.defaultProps = {
   children: 'Search',
@@ -241,6 +262,10 @@ Button.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
   children: PropTypes.node.isRequired,
+};
+
+const Loading = () => {
+  return <div>Loading...</div>;
 };
 
 export default App;
