@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import fetch from 'isomorphic-fetch';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
@@ -207,3 +208,6 @@ const Button = ({ children, onClick, className = '' }) => (
 );
 
 export default App;
+
+//TODO: 记得最后的时候【组织代码】把以下这些组件分离出去
+export { Button, Table, Search };
