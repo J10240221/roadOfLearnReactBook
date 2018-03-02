@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import fetch from 'isomorphic-fetch';
+import PropTypes from 'prop-types';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
@@ -165,6 +166,18 @@ const Search = ({ value, onChange, onSubmit, children }) => (
   </form>
 );
 
+Search.defaultProps = {
+  children: 'Search',
+  value: '',
+};
+
+Search.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
+  children: PropTypes.node,
+};
+
 const Table = ({ list, onDismiss }) => {
   const largeColumn = { width: '40%' };
   const midColumn = { width: '30%' };
@@ -200,12 +213,35 @@ const Table = ({ list, onDismiss }) => {
   );
 };
 
+Table.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      objectID: PropTypes.string.isRequired,
+      author: PropTypes.string,
+      url: PropTypes.string,
+      num_comments: PropTypes.number,
+      points: PropTypes.number,
+    })
+  ).isRequired,
+  onDismiss: PropTypes.func.isRequired,
+};
+
 //es6的方式设置默认值
-const Button = ({ children, onClick, className = '' }) => (
+const Button = ({ children, onClick, className }) => (
   <button type="button" onClick={onClick} className={className}>
     {children}
   </button>
 );
+
+Button.defaultProps = {
+  className: '',
+};
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};
 
 export default App;
 
