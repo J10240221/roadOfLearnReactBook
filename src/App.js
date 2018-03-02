@@ -145,17 +145,14 @@ class App extends Component {
           <Table list={list} onDismiss={this.onDismiss} />
         )}
         <div className="interactions">
-          {loading ? (
-            <Loading />
-          ) : (
-            <Button
-              onClick={() => {
-                this.fetchSearchTopStories(searchTerm, page + 1);
-              }}
-            >
-              more
-            </Button>
-          )}
+          <ButtonWithLoading
+            isLoading={loading}
+            onClick={() => {
+              this.fetchSearchTopStories(searchTerm, page + 1);
+            }}
+          >
+            more
+          </ButtonWithLoading>
         </div>
       </div>
     );
@@ -267,6 +264,13 @@ Button.propTypes = {
 const Loading = () => {
   return <div>Loading...</div>;
 };
+
+const withLoading = Com => ({ isLoading, ...rest }) => {
+  return isLoading ? <Loading /> : <Com {...rest} />;
+};
+
+//这个返回的就是一个【无状态组件】，即({ isLoading, ...rest }) => <Com /> ;然后使用只需要实例化它即可
+const ButtonWithLoading = withLoading(Button);
 
 export default App;
 
