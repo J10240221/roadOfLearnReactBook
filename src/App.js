@@ -98,8 +98,13 @@ class App extends Component {
   }
 
   setSearchTopStories(json) {
-    const { page = 0, hits } = json;
-    const { results, searchKey } = this.state;
+    const { hits, page = 0 } = json;
+
+    this.setState(this.updateSearchTopStoriesState(hits, page));
+  }
+
+  updateSearchTopStoriesState = (hits, page) => prevState => {
+    const { results, searchKey } = prevState;
     const oldHits =
       (results && results[searchKey] && results[searchKey].hits) || [];
     const updateHits = [...oldHits, ...hits];
@@ -110,8 +115,8 @@ class App extends Component {
         page,
       },
     };
-    this.setState({ results: updateResults, loading: false });
-  }
+    return { results: updateResults, loading: false };
+  };
 
   needToSearchTopStories(searchKey) {
     return !this.state.results[searchKey];
