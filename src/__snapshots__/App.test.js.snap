@@ -26,6 +26,85 @@ exports[`App has a valid snapshot 1`] = `
     className="table"
   >
     <div
+      className="table-header"
+    >
+      <span
+        style={
+          Object {
+            "width": "40%",
+          }
+        }
+      >
+        <button
+          className="button-inline "
+          onClick={[Function]}
+          type="button"
+        >
+          Title
+        </button>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "30%",
+          }
+        }
+      >
+        <button
+          className="button-inline "
+          onClick={[Function]}
+          type="button"
+        >
+          Author
+        </button>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        <button
+          className="button-inline "
+          onClick={[Function]}
+          type="button"
+        >
+          Comments
+        </button>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        <button
+          className="button-inline "
+          onClick={[Function]}
+          type="button"
+        >
+          Points
+        </button>
+      </span>
+      <span
+        style={
+          Object {
+            "width": "10%",
+          }
+        }
+      >
+        <button
+          className="button-inline button-active"
+          onClick={[Function]}
+          type="button"
+        >
+          Archive
+        </button>
+      </span>
+    </div>
+    <div
       className="table-row"
     >
       <span
@@ -116,6 +195,85 @@ exports[`Table has a valid snapshot 1`] = `
 <div
   className="table"
 >
+  <div
+    className="table-header"
+  >
+    <span
+      style={
+        Object {
+          "width": "40%",
+        }
+      }
+    >
+      <button
+        className="button-inline button-active"
+        onClick={[Function]}
+        type="button"
+      >
+        Title
+      </button>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "30%",
+        }
+      }
+    >
+      <button
+        className="button-inline "
+        onClick={[Function]}
+        type="button"
+      >
+        Author
+      </button>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      <button
+        className="button-inline "
+        onClick={[Function]}
+        type="button"
+      >
+        Comments
+      </button>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      <button
+        className="button-inline "
+        onClick={[Function]}
+        type="button"
+      >
+        Points
+      </button>
+    </span>
+    <span
+      style={
+        Object {
+          "width": "10%",
+        }
+      }
+    >
+      <button
+        className="button-inline "
+        onClick={[Function]}
+        type="button"
+      >
+        Archive
+      </button>
+    </span>
+  </div>
   <div
     className="table-row"
   >
@@ -211,6 +369,12 @@ exports[`Table has a valid snapshot 1`] = `
     <button
       className="button-inline"
       onClick={[Function]}
+      style={
+        Object {
+          "color": "blue",
+          "width": "10%",
+        }
+      }
       type="button"
     >
       Dismiss
@@ -262,6 +426,12 @@ exports[`Table has a valid snapshot 1`] = `
     <button
       className="button-inline"
       onClick={[Function]}
+      style={
+        Object {
+          "color": "blue",
+          "width": "10%",
+        }
+      }
       type="button"
     >
       Dismiss

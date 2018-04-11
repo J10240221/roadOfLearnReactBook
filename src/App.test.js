@@ -81,6 +81,8 @@ describe('Table', () => {
       },
     ],
     onDismiss: () => {},
+    sortKey: 'TITLE',
+    isSortReverse: false,
   };
 
   it('render without crashing', () => {
